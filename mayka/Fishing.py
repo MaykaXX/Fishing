@@ -12,14 +12,14 @@ class Fishing:
         self.fish_left = 0
         self.qualit_worm = 0
         self.worm_left = 0
-        self.worm_left > 0
+        self.var = self.worm_left > 0
         self.money = 0
         self.colored_fish_list = []
         self.caught_fish = []  # список пойманой рыбы
 
     def list_activity(self):
         activism = ['1-Перекусить будербродом', '2-Посмотреть в даль', '3-Любоваться природой', '4-Ловить рыбу',
-                    '5-Ничего']
+                    '5-Ничего', '6-Уйти домой']
         for activity in activism:
             print(activity)
         activism[0] = 1
@@ -27,6 +27,7 @@ class Fishing:
         activism[2] = 3
         activism[3] = 4
         activism[4] = 5
+        activism[5] = 6
         self.activ_funk()
 
     def activ_funk(self):
@@ -48,6 +49,8 @@ class Fishing:
             elif any_act == 5:
                 print("Хорошо!")
                 exit()
+            elif any_act == 6:
+                self.exit_()
             else:
                 print("Ой что-то не так! Попробуй ещё раз...")
                 self.activ_funk()
@@ -56,7 +59,6 @@ class Fishing:
             self.activ_funk()
 
     def rand_qual_worms(self):
-        global qualit_worm, worm_left
         worms_rand = random.randint(1, 10)
         self.qualit_worm = worms_rand
         self.worm_left = worms_rand
@@ -93,8 +95,6 @@ class Fishing:
                 self.worm_()
 
     def catch_fish_def(self):
-        global worm_wrong_enter, fish_count, fish_left, worm_left, money
-
         catch_fish = input("Выудить рыбку? ")
         if catch_fish.lower() == 'да':
             fish = self.random_fish()
@@ -155,12 +155,10 @@ class Fishing:
             return f"{Fore.WHITE}Неизвестная рыба{Style.RESET_ALL}"
 
     def cooking(self, fish):
-        cook = input(f"Хочешь приготовить {fish['name']} на костре? (да/нет) ")
+        cook = input(f"Хочешь приготовить {self.color_fish(fish)} на костре? (да/нет) ")
         if cook.lower() == "да":
-            self.process_cook()
-            print(f"{Fore.MAGENTA}Ты приготовил {fish['name']}{Style.RESET_ALL}")
-            self.money -= fish['price']
-            self.exit_()
+            self.process_cook(fish)
+
         elif cook.lower() == "нет":
             print(f"Ты оставил {self.color_fish(fish)} сырой")
             self.exit_()
@@ -168,10 +166,16 @@ class Fishing:
             print(f"Ты слишком голоден, чтобы написать {Fore.RED}<да> или <нет>{Style.RESET_ALL}")
             self.cooking(fish)
 
-    def process_cook(self):
+    def process_cook(self, fish):
         for i in 'Cooking':
             print(f"{Fore.BLUE}{i}{Style.RESET_ALL}")
-
+        print(f"{Fore.MAGENTA}Ты приготовил{Style.RESET_ALL} {self.color_fish(fish)}")
+        self.money -= fish['price']
+        if fish in self.caught_fish:
+            self.caught_fish.remove(fish)
+        # self.fish_left = len(self.caught_fish)
+        self.fish_left -= 1
+        print(f"{Fore.BLACK}{self.caught_fish}{Style.RESET_ALL}")
         print(f"{Fore.MAGENTA}ух, а уха получилась отличная:)!{Style.RESET_ALL}")
         self.eat()
 
@@ -185,17 +189,15 @@ class Fishing:
             self.eat()
 
     def exit_(self):
-        global fish_count, fish_left, worm_left, colored_fish_list
-
         exit_choice = input("Завершить рыбалку? ")
         if exit_choice.lower() == 'да':
             if self.fish_left != 0:
-                colored_fish_list = ', '.join([
+                self.colored_fish_list = ', '.join([
                     self.color_fish(fish) for fish in self.caught_fish if isinstance(fish, dict)
                 ])
                 print(
                     f"Сегодня ты поймал:  {Fore.BLUE}{self.fish_count}{Style.RESET_ALL} рыб(у)\n"
-                    f"В сетке: {colored_fish_list}\n"
+                    f"В сетке: {self.colored_fish_list}\n"
                     f"С собой домой несешь: {Fore.BLUE}{self.fish_left}{Style.RESET_ALL} сырых(-ую) рыб(у)\n"
                     # f"У тебя осталось: {Fore.BLUE}{self.worm_left}{Style.RESET_ALL} червь(-ей)\n"
                 )
@@ -248,6 +250,7 @@ class Fishing:
     def print_money(self):
         print(
             f"Ты выручил с рыбалки {Fore.BLUE}{self.money}{Style.RESET_ALL} рублей. \nТвой мешочек полон денег💰!")
+        self.caught_fish = 0
         self.print_home()
         self.call_home()
 
@@ -286,10 +289,14 @@ class AtHome(Fishing):
     def activ_funk_home(self):
         choice = int(input("Что хочешь сделать? (1-5) "))
         if choice == 1:
-            print(f"ТЫ положил рыбу:")
-            for fish in self.fridge:
-                print(f"{fish['name']}")
-            self.activ_funk_home()
+            if len(self.fridge) != 0:
+                print(f"Ты положил рыбу: ")
+                for fish in self.fridge:
+                    print(f"\t{self.color_fish(fish)}")
+                self.activ_funk_home()
+            else:
+                print("У тебя нету рыбы!")
+                self.activ_funk_home()
         elif choice == 2:
             print(
                 "Телевизор включен. Твоя спина отдыхает, и ты чувствуешь, как твои ноги тихо гудят от насыщеного дня...")
@@ -309,14 +316,6 @@ class AtHome(Fishing):
             print("Неверный выбор. Попробуй еще!")
             self.activ_funk_home()
 
-    #def fridge_list(self, colored_fish_list):
-       # if isinstance(colored_fish_list, list):
-        #    self.fridge.extend(colored_fish_list)
-        #    print(f"Положена рыба: {', '.join([self.color_fish(fish) for fish in self.fridge])}\nОтличная работа!🐟")
-         #   exit()
-       # else:
-        #    print("Ошибка: `colored_fish_list` должен быть списком!")
-
     def random_visit(self):
         visit = random.randint(0, 1)
         if visit == 0:
@@ -328,6 +327,8 @@ class AtHome(Fishing):
     def tea(self):
         mes = input("У тебя закончились травы. Пойдешь в горы? ")
         if mes.lower() == 'да':
+            for i in 'going...':
+                print(f"{Fore.BLUE}{i}{Style.RESET_ALL}")
             mountains = Mountains()
             mountains.message()
             mountains.collect_tea()
@@ -352,7 +353,7 @@ class AtHome(Fishing):
             enter_numbers = input("Введи правильную последовательность цыфр: ")
             if enter_numbers == '1234':
                 for tea in 'teaparty':
-                    print(tea)
+                    print(f"{Fore.BLUE}{tea}{Style.RESET_ALL}")
                 self.inventar -= 1
                 print("Аромат чай сводит тебя с ума! Вот что значит чай с горных растений..")
                 print(f"У тебя осталось: {Fore.BLUE}{self.inventar}{Style.RESET_ALL} ")
@@ -379,7 +380,7 @@ class AtHome(Fishing):
 class Mountains(AtHome):
 
     def __init__(self):
-        super().__init__(colored_fish_list=None, inventar=0)
+        super().__init__(inventar=0, caught_fish=0)
         self.max_length = 10
         self.dog_met = False
         self.qual_tea = 0
@@ -436,7 +437,7 @@ class Mountains(AtHome):
         for i in "Возвращение домой...":
             print(f"{Fore.CYAN}{i}{Style.RESET_ALL}", end='', flush=True)
         print()
-        home = AtHome(colored_fish_list=None, inventar=self.inventar)
+        home = AtHome(inventar=self.inventar, caught_fish=0)
         home.mes_you_home()
         home.activ_at_home()
 
