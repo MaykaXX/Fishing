@@ -12,7 +12,6 @@ class Fishing:
         self.fish_left = 0
         self.qualit_worm = 0
         self.worm_left = 0
-        self.var = self.worm_left > 0
         self.money = 0
         self.colored_fish_list = []
         self.caught_fish = []  # список пойманой рыбы
@@ -32,7 +31,7 @@ class Fishing:
 
     def activ_funk(self):
         try:
-            any_act = int(input("Что хочешь делать сегодня?(1-5) "))
+            any_act = int(input("\nЧто хочешь делать сегодня?(1-5) "))
             if any_act == 1:
                 print(f"{Fore.YELLOW}Ты подкрепился!{Style.RESET_ALL}")
                 self.activ_funk()
@@ -66,33 +65,34 @@ class Fishing:
 
     def worm_(self):
         while True:
-            worm = input("Наживить червя на крючок? ")
-            if worm.lower() == 'да':
-                self.qualit_worm -= 1
-                self.worm_left = self.qualit_worm
-                throw_into = input("Закинуть приманку в пруд? ")
-                if throw_into.lower() == 'да':
-                    lucky = random.randint(0, 1)
-                    if lucky == 1:
-                        print("Жаль, ничего не клюёт( ")
-                        print(f"У тебя осталось {Fore.BLUE}{self.worm_left}{Style.RESET_ALL} червь(-ей)")
-                        self.exit_()
+            while self.worm_left > 0:
+                worm = input("Наживить червя на крючок? ")
+                if worm.lower() == 'да':
+                    self.qualit_worm -= 1
+                    self.worm_left = self.qualit_worm
+                    throw_into = input("Закинуть приманку в пруд? ")
+                    if throw_into.lower() == 'да':
+                        lucky = random.randint(0, 1)
+                        if lucky == 1:
+                            print("Жаль, ничего не клюёт( ")
+                            print(f"У тебя осталось {Fore.BLUE}{self.worm_left}{Style.RESET_ALL} червь(-ей)")
+                            self.exit_()
+                        else:
+                            self.catch_fish_def()
+                    elif throw_into.lower() == 'нет':
+                        print("Зачем червя убил??")
+                        exit()
                     else:
-                        self.catch_fish_def()
-                elif throw_into.lower() == 'нет':
-                    print("Зачем червя убил??")
-                    exit()
+                        print(f"{Fore.RED}(надо было да/нет ответить){Style.RESET_ALL}")
+                        self.worm_()
+
+                elif worm.lower() == 'нет':
+                    print("Странно..")
+                    self.activ_funk()
+
                 else:
-                    print(f"{Fore.RED}(надо было да/нет ответить){Style.RESET_ALL}")
+                    print(f"Промахнулся!{Fore.RED}(надо было да/нет ответить){Style.RESET_ALL}")
                     self.worm_()
-
-            elif worm.lower() == 'нет':
-                print("Странно..")
-                self.activ_funk()
-
-            else:
-                print(f"Промахнулся!{Fore.RED}(надо было да/нет ответить){Style.RESET_ALL}")
-                self.worm_()
 
     def catch_fish_def(self):
         catch_fish = input("Выудить рыбку? ")
@@ -265,18 +265,22 @@ class Fishing:
 
 
 class AtHome(Fishing):
+    fridge = []
 
     def __init__(self, caught_fish, inventar=0):
         super().__init__()
-        self.fridge = caught_fish
+        self.caught_fish = caught_fish
         self.inventar = inventar
 
     def mes_you_home(self):
         print("Ты вернулся домой!")
 
-    def activ_at_home(self):
-        list_at_home = ['1. Положить рыбу в холодильник', '2. Смотреть телевизор', '3. Стирать одежду', '4. Идти спать',
-                        '5. Заварить чаю🍵']
+    def activ_at_home(
+            self):  # сделать не список, а словарь с вариантами действий  [{'1': 'Положить рыбу в холодильник'}]
+        list_at_home = ['1. Положить рыбу в холодильник', '2. Смотреть телевизор',
+                        '3. Стирать одежду', '4. Идти спать', '5. Заварить чаю🍵',
+                        '6. Посмотреть в холодильник', '7. Пойти на рыбалку'
+                        ]
         for activ in list_at_home:
             print(activ)
         list_at_home[0] = 1
@@ -284,15 +288,20 @@ class AtHome(Fishing):
         list_at_home[2] = 3
         list_at_home[3] = 4
         list_at_home[4] = 5
+        list_at_home[5] = 6
+        list_at_home[6] = 7
         self.activ_funk_home()
 
     def activ_funk_home(self):
-        choice = int(input("Что хочешь сделать? (1-5) "))
+        global fridge
+        choice = int(input("\nЧто хочешь сделать? (1-5) "))
         if choice == 1:
-            if len(self.fridge) != 0:
+            if len(self.caught_fish) != 0:
                 print(f"Ты положил рыбу: ")
-                for fish in self.fridge:
+                for fish in self.caught_fish:
                     print(f"\t{self.color_fish(fish)}")
+                self.fridge.extend(self.caught_fish)
+                self.caught_fish = []
                 self.activ_funk_home()
             else:
                 print("У тебя нету рыбы!")
@@ -312,6 +321,17 @@ class AtHome(Fishing):
                 self.tea()
             else:
                 self.make_tea()
+        elif choice == 6:
+            print("У тебя есть: ")
+
+            def show_fish():
+                for fish in self.fridge:
+                    print(f"\t{self.color_fish(fish)}")
+                self.activ_funk_home()
+
+            show_fish()
+        elif choice == 7:
+            start()
         else:
             print("Неверный выбор. Попробуй еще!")
             self.activ_funk_home()
@@ -442,6 +462,13 @@ class Mountains(AtHome):
         home.activ_at_home()
 
 
-if __name__ == '__main__':
-    fishing = Fishing()
-    fishing.list_activity()
+def start():
+    if __name__ == '__main__':
+        fishing = Fishing()
+        fishing.list_activity()
+
+
+start()
+
+# home = AtHome(inventar=0, caught_fish=[])
+# home.activ_at_home()
