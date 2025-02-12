@@ -1,4 +1,6 @@
 import random
+from threading import activeCount
+
 import colorama
 from colorama import Fore, Style
 
@@ -261,85 +263,115 @@ class Fishing:
     def call_home(self):
         home = AtHome(self.caught_fish)
         home.mes_you_home()
-        home.activ_at_home()
+        home.activation()
 
 
 class AtHome(Fishing):
     fridge = []
 
-    def __init__(self, caught_fish, inventar=0):
+    def __init__(self, caught_fish, inventar=0, dog_met=False):
         super().__init__()
         self.caught_fish = caught_fish
         self.inventar = inventar
+        self.dog_met = dog_met
+        self.dog_eat = False
+        self.action()
 
     def mes_you_home(self):
         print("Ты вернулся домой!")
 
-    def activ_at_home(
-            self):  # сделать не список, а словарь с вариантами действий  [{'1': 'Положить рыбу в холодильник'}]
-        list_at_home = ['1. Положить рыбу в холодильник', '2. Смотреть телевизор',
-                        '3. Стирать одежду', '4. Идти спать', '5. Заварить чаю🍵',
-                        '6. Посмотреть в холодильник', '7. Пойти на рыбалку'
-                        ]
-        for activ in list_at_home:
-            print(activ)
-        list_at_home[0] = 1
-        list_at_home[1] = 2
-        list_at_home[2] = 3
-        list_at_home[3] = 4
-        list_at_home[4] = 5
-        list_at_home[5] = 6
-        list_at_home[6] = 7
-        self.activ_funk_home()
+    def action(self):
+        self.list_at_home = {
+            1: ("Положить рыбу в холодильник", self.fridge_fun),
+            2: ("Смотреть телевизор", self.tv),
+            3: ("Стирать одежду", self.washing_clothes),
+            4: ("Идти спать", self.good_night),
+            5: ("Заварить чаю🍵", self.make_tea),
+            6: ("Посмотреть в холодильник", self.see_fridge),
+            7: ("Пойти на рыбалку", start),
+        }
+        if self.dog_met:
+            self.list_at_home[8] = ("Покормить песика", self.feed_dog)
 
-    def activ_funk_home(self):
+    def activation(self):
+        self.action()
+        for key, (desc, _) in self.list_at_home.items():
+            print(f"{key}. {desc}")
+
+        self.activ_at_home()
+
+    def activ_at_home(self):
+        try:
+            self.choice = int(input("\nЧто хочешь сделать? (1-7) "))
+
+            if self.choice in self.list_at_home:
+                list_at_home = self.list_at_home[self.choice][1]
+                list_at_home()
+            else:
+                print("Неверный выбор! Попробуй еще :)")
+                self.activ_at_home()
+        except ValueError:
+            print("Введи номер!")
+            self.activ_at_home()
+
+    def fridge_fun(self):
         global fridge
-        choice = int(input("\nЧто хочешь сделать? (1-5) "))
-        if choice == 1:
-            if len(self.caught_fish) != 0:
-                print(f"Ты положил рыбу: ")
-                for fish in self.caught_fish:
-                    print(f"\t{self.color_fish(fish)}")
-                self.fridge.extend(self.caught_fish)
-                self.caught_fish = []
-                self.activ_funk_home()
-            else:
-                print("У тебя нету рыбы!")
-                self.activ_funk_home()
-        elif choice == 2:
-            print(
-                "Телевизор включен. Твоя спина отдыхает, и ты чувствуешь, как твои ноги тихо гудят от насыщеного дня...")
-            self.random_visit()
-        elif choice == 3:
-            print("Ты стираешь одежду. Числота - залог здоровья!")
-            self.activ_funk_home()
-        elif choice == 4:
-            print("Спокойной ночи! Пусть тебе приснится самая большая рыбка🌞.\nИгра завершена.")
-            exit()
-        elif choice == 5:
-            if self.inventar == 0:
-                self.tea()
-            else:
-                self.make_tea()
-        elif choice == 6:
-            print("У тебя есть: ")
-
-            def show_fish():
-                for fish in self.fridge:
-                    print(f"\t{self.color_fish(fish)}")
-                self.activ_funk_home()
-
-            show_fish()
-        elif choice == 7:
-            start()
+        if self.caught_fish != 0:
+            print(f"Ты положил рыбу: ")
+            for fish in self.caught_fish:
+                print(f"\t{self.color_fish(fish)}")
+            self.fridge.extend(self.caught_fish)
+            self.caught_fish = []
+            self.activation()
         else:
-            print("Неверный выбор. Попробуй еще!")
-            self.activ_funk_home()
+            print("У тебя нету рыбы!")
+            self.activation()
+
+    def tv(self):
+        print(
+            f"{Fore.YELLOW}Телевизор включен. Твоя спина отдыхает,\nи ты чувствуешь, как твои ноги тихо гудят от насыщеного дня...👌✨{Style.RESET_ALL}")
+        self.random_visit()
+
+    def washing_clothes(self):
+        print(f"{Fore.YELLOW}Ты стираешь одежду. Числота - залог здоровья!🫧{Style.RESET_ALL}")
+        self.activation()
+
+    def good_night(self):
+        print(
+            f"{Fore.YELLOW}Спокойной ночи! Пусть тебе приснится самая большая рыбка🌞.\nИгра завершена.{Style.RESET_ALL}")
+        exit()
+
+    def check_tea(self):
+        if self.inventar == 0:
+            self.tea()
+        else:
+            self.make_tea()
+
+    def see_fridge(self):
+        print("У тебя есть: ")
+
+        def show_fish():
+            for fish in self.fridge:
+                print(f"\t{self.color_fish(fish)}")
+            self.activation()
+
+        show_fish()
+
+    def feed_dog(self):
+        if not self.dog_eat:
+            for i in "Feed":
+                print(f"{Fore.MAGENTA}{i}{Style.RESET_ALL}")
+            print(f"{Fore.GREEN}Песик теперь сыт! Молодец :){Style.RESET_ALL}")
+            self.dog_eat = True
+            self.activation()
+        else:
+            print(f"{Fore.CYAN}Ты уже кормил его ранее){Style.RESET_ALL}")
+            self.activation()
 
     def random_visit(self):
         visit = random.randint(0, 1)
         if visit == 0:
-            self.activ_funk_home()
+            self.activation()
         else:
             print(f"В гости наведался {Fore.YELLOW}Клим{Style.RESET_ALL}!")
             self.nardu_klim()
@@ -351,11 +383,10 @@ class AtHome(Fishing):
                 print(f"{Fore.BLUE}{i}{Style.RESET_ALL}")
             mountains = Mountains()
             mountains.message()
-            mountains.collect_tea()
 
         elif mes.lower() == 'нет':
             print("Хорошо, не пойдем")
-            self.activ_funk_home()
+            self.activation()
         else:
             print(f"{Fore.RED}да/нет{Style.RESET_ALL}")
             self.tea()
@@ -368,6 +399,8 @@ class AtHome(Fishing):
                       "1. Достать ароматные травы\n"
                       "4. Всыпать горсток трав")
             print(recept)
+        else:
+            self.tea()
 
         def numbers():
             enter_numbers = input("Введи правильную последовательность цыфр: ")
@@ -377,7 +410,7 @@ class AtHome(Fishing):
                 self.inventar -= 1
                 print("Аромат чай сводит тебя с ума! Вот что значит чай с горных растений..")
                 print(f"У тебя осталось: {Fore.BLUE}{self.inventar}{Style.RESET_ALL} ")
-                self.activ_funk_home()
+                self.activation()
             else:
                 print("Попробуй ещё!")
                 numbers()
@@ -396,26 +429,33 @@ class AtHome(Fishing):
             print(f"{Fore.RED}да/нет{Style.RESET_ALL}")
             self.nardu_klim()
 
+    def new_friend(self):
+        if not self.dog_met:
+            self.dog_met = True
+            print(
+                f"{Fore.GREEN}У тебя теперь есть друг!\n<Теперь тебе доступно больше действий в доме>{Style.RESET_ALL}")
+        self.action()
+        self.activation()
+
 
 class Mountains(AtHome):
+    dog_met = False
 
     def __init__(self):
         super().__init__(inventar=0, caught_fish=0)
         self.max_length = 10
-        self.dog_met = False
         self.qual_tea = 0
 
     def message(self):
         print(f"{Fore.GREEN}Вы добрались до богатой поляны{Style.RESET_ALL}")
+        self.for_dog()
+        self.random_tea()
 
     def for_dog(self):
-        if self.dog_met:
-            return
-
-        chanse = random.randint(0, 100)
-        if chanse == 100:
-            dog_met = True
-            return f"{Fore.YELLOW}Вас стретился одинокий песик!{Style.RESET_ALL}"
+        global dog_met
+        if self.dog_met == False and random.randint(0, 1) == 1:
+            self.dog_met = True
+            print(f"{Fore.YELLOW}Вам встретился одинокий песик!{Style.RESET_ALL}")
 
     def collect_tea(self):
         self.random_tea()
@@ -457,9 +497,9 @@ class Mountains(AtHome):
         for i in "Возвращение домой...":
             print(f"{Fore.CYAN}{i}{Style.RESET_ALL}", end='', flush=True)
         print()
-        home = AtHome(inventar=self.inventar, caught_fish=0)
+        home = AtHome(inventar=self.inventar, caught_fish=0, dog_met=self.dog_met)
         home.mes_you_home()
-        home.activ_at_home()
+        home.activation()
 
 
 def start():
@@ -468,7 +508,9 @@ def start():
         fishing.list_activity()
 
 
-start()
+# start()
 
-# home = AtHome(inventar=0, caught_fish=[])
-# home.activ_at_home()
+home = AtHome(inventar=0, caught_fish=0)
+home.activation()
+# moun = Mountains()
+# moun.message()
