@@ -6,14 +6,14 @@ colorama.init()
 
 
 class Fishing:
-    def __init__(self, fish_rod, fish_count, fish_left, worm_left, money, colored_fish_list:list, caught_fish:list):
+    def __init__(self, fish_rod, fish_count, fish_left, worm_left, money, colored_fish_list: list, caught_fish: list):
         self.fish_rod = fish_rod
         self.fish_count = fish_count
         self.fish_left = fish_left
         self.worm_left = worm_left
         self.money = money
         self.colored_fish_list = colored_fish_list
-        self.caught_fish = caught_fish # список пойманой рыбы
+        self.caught_fish = caught_fish  # список пойманой рыбы
         self.worm_wrong_enter = 0
         self.qualit_worm = 0
 
@@ -319,14 +319,14 @@ class Fishing:
 
     def call_home(self):
         home = AtHome(
-        fish_rod=self.fish_rod,
-        fish_count=self.fish_count,
-        fish_left=self.fish_left,
-        worm_left=self.worm_left,
-        money=self.money,
-        colored_fish_list=self.colored_fish_list,
-        caught_fish=self.caught_fish,
-                      )
+            fish_rod=self.fish_rod,
+            fish_count=self.fish_count,
+            fish_left=self.fish_left,
+            worm_left=self.worm_left,
+            money=self.money,
+            colored_fish_list=self.colored_fish_list,
+            caught_fish=self.caught_fish,
+        )
         home.mes_you_home()
         home.activation()
 
@@ -334,7 +334,8 @@ class Fishing:
 class AtHome(Fishing):
     fridge = []
 
-    def __init__(self, fish_rod, fish_count, fish_left, worm_left, money, colored_fish_list:list, caught_fish:list, inventar=0, dog_met=False, dog_eat=False):
+    def __init__(self, fish_rod, fish_count, fish_left, worm_left, money, colored_fish_list: list, caught_fish: list,
+                 inventar=0, dog_met=False, dog_eat=False):
         super().__init__(fish_rod, fish_count, fish_left, worm_left, money, colored_fish_list, caught_fish)
         self.inventar = inventar
         self.dog_met = dog_met
@@ -437,14 +438,14 @@ class AtHome(Fishing):
 
     def go_fishing(self):
         fishing = Fishing(
-        fish_rod=self.fish_rod,
-        fish_count=self.fish_count,
-        fish_left=self.fish_left,
-        worm_left=self.worm_left,
-        money=self.money,
-        colored_fish_list=self.colored_fish_list,
-        caught_fish=self.caught_fish
-                          )
+            fish_rod=self.fish_rod,
+            fish_count=self.fish_count,
+            fish_left=self.fish_left,
+            worm_left=self.worm_left,
+            money=self.money,
+            colored_fish_list=self.colored_fish_list,
+            caught_fish=self.caught_fish
+        )
         fishing.list_activity()
         fishing.activation()
 
@@ -469,7 +470,15 @@ class AtHome(Fishing):
         if mes.lower() == 'да':
             for i in 'going...':
                 print(f"{Fore.BLUE}{i}{Style.RESET_ALL}")
-            mountains = Mountains(self.fish_rod, self.money, self.dog_met, worm_left=self.worm_left, money=self.money, caught_fish=self.caught_fish, dog_met=self.dog_met)
+            mountains = Mountains(
+                fish_rod=self.fish_rod,
+                money=self.money,
+                caught_fish=self.caught_fish,
+                worm_left=self.worm_left,
+                fish_left=self.fish_left,
+                inventar=self.inventar,
+                dog_met=self.dog_met
+            )
             mountains.message()
 
         elif mes.lower() == 'нет':
@@ -527,9 +536,10 @@ class AtHome(Fishing):
             self.action()
             self.activation()
 
+
 class Mountains(AtHome):
-    def __init__(self, fish_rod, fish_count, fish_left, worm_left, money, caught_fish, inventar=0, dog_met):
-        super().__init__(caught_fish, money, fish_rod, inventar, fish_count, worm_left, fish_left, dog_met)
+    def __init__(self, fish_rod, fish_left, worm_left, money, caught_fish, inventar=0, dog_met=self.dog_met):
+        super().__init__(fish_rod, money, caught_fish, worm_left, fish_left, inventar, dog_met)
         self.max_length = 10
         self.qual_tea = 0
 
@@ -637,15 +647,15 @@ class Mountains(AtHome):
             print(f"{Fore.CYAN}{i}{Style.RESET_ALL}", end='', flush=True)
         print()
         home = AtHome(
-        fish_rod=self.fish_rod,
-        fish_count=self.fish_count,
-        fish_left=self.fish_left,
-        worm_left=self.worm_left,
-        money=self.money,
-        colored_fish_list=self.colored_fish_list,
-        caught_fish=self.caught_fish,
-        inventar=self.inventar,
-        dog_met=self.dog_met
+            fish_rod=self.fish_rod,
+            fish_count=self.fish_count,
+            fish_left=self.fish_left,
+            worm_left=self.worm_left,
+            money=self.money,
+            colored_fish_list=self.colored_fish_list,
+            caught_fish=self.caught_fish,
+            inventar=self.inventar,
+            dog_met=self.dog_met
         )
         home.mes_you_home()
         home.activation()
