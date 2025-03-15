@@ -7,7 +7,7 @@ colorama.init()
 
 class Fishing:
     def __init__(self, fish_rod: str, fish_count: int, fish_left: int, worm_left: int, money: int,
-                 colored_fish_list: list, caught_fish: list, type_worm: str, level: int, cash: int):
+                 colored_fish_list: list, caught_fish: list, type_worm: str, level: int, cash: int, pie: int):
         self.fish_rod = fish_rod
         self.fish_left: int = fish_left
         self.worm_left = worm_left
@@ -16,6 +16,7 @@ class Fishing:
         self.type_worm = type_worm
         self.level = level
         self.cash = cash
+        self.pie = pie
         if not isinstance(caught_fish, list):
             print(f"Внимание! caught_fish был {type(caught_fish)}, заменяю на пустой список.")
             caught_fish = []
@@ -406,7 +407,8 @@ class Fishing:
             caught_fish=self.caught_fish,
             type_worm=self.type_worm,
             level=self.level,
-            cash=self.cash
+            cash=self.cash,
+            pie=self.pie
         )
         home.mes_you_home()
         home.activation()
@@ -416,11 +418,11 @@ class AtHome(Fishing):
     fridge = []
 
     def __init__(self, fish_rod, fish_count: int, fish_left: int, worm_left, money_in_wallet, colored_fish_list: list,
-                 caught_fish: list, type_worm, level: int, cash,
+                 caught_fish: list, type_worm, level: int, cash, pie: int,
                  inventar=0, dog_met=False, dog_eat=False, new_act=0):
         super().__init__(fish_rod, fish_count, fish_left, worm_left, money_in_wallet, colored_fish_list, caught_fish,
                          type_worm,
-                         level, cash)
+                         level, cash, pie)
         self.inventar = inventar
         self.dog_met = dog_met
         self.dog_eat = dog_eat
@@ -433,7 +435,7 @@ class AtHome(Fishing):
 
     def action(self):
         self.list_at_home = {
-            1: ("Положить рыбу в холодильник", self.fridge_fun),
+            1: ("Холодильник", self.fridge_fun),
             2: ("Смотреть телевизор", self.tv),
             3: ("Стирать одежду", self.washing_clothes),
             4: ("Идти спать", self.good_night),
@@ -473,16 +475,18 @@ class AtHome(Fishing):
 
     def fridge_fun(self):
         global fridge
-        if self.caught_fish == []:
-            print("У тебя нету рыбы!")
-            self.activation()
-        else:
-            print(f"Ты положил рыбу: ")
-            for fish in self.caught_fish:
-                print(f"\t{self.color_fish(fish)}")
-            self.fridge.extend(self.caught_fish)
-            self.caught_fish.clear()
-            self.activation()
+        quest1 = int(input("Положить в холодильник(1) или взять из холодильника(2): "))
+        if quest1 == 1:
+            if self.caught_fish == []:
+                print("У тебя нету рыбы!")
+                self.activation()
+            else:
+                print(f"Ты положил рыбу: ")
+                for fish in self.caught_fish:
+                    print(f"\t{self.color_fish(fish)}")
+                self.fridge.extend(self.caught_fish)
+                self.caught_fish.clear()
+                self.activation()
 
     def tv(self):
         print(
@@ -539,7 +543,8 @@ class AtHome(Fishing):
             caught_fish=self.caught_fish,
             type_worm=self.type_worm,
             level=self.level,
-            cash=self.cash
+            cash=self.cash,
+            pie=self.pie
         )
         fishing.list_activity()
         fishing.activation()
@@ -562,7 +567,8 @@ class AtHome(Fishing):
                     colored_fish_list=self.colored_fish_list,
                     caught_fish=self.caught_fish,
                     level=self.level,
-                    cash=self.cash)
+                    cash=self.cash,
+                    pie=self.pie)
         fair.message()
 
     def random_visit(self):
@@ -580,7 +586,7 @@ class AtHome(Fishing):
                 print(f"{Fore.BLUE}{i}{Style.RESET_ALL}")
             mountains = Mountains(
                 fish_rod=self.fish_rod,
-                money=self.money_in_wallet,
+                money_in_wallet=self.money_in_wallet,
                 caught_fish=self.caught_fish,
                 worm_left=self.worm_left,
                 fish_left=self.fish_left,
@@ -589,7 +595,8 @@ class AtHome(Fishing):
                 new_act=self.new_act,
                 type_worm=self.type_worm,
                 level=self.level,
-                cash=self.cash
+                cash=self.cash,
+                pie=self.pie
             )
             mountains.message()
 
@@ -653,16 +660,18 @@ class AtHome(Fishing):
 
 
 class Mountains(AtHome):
-    def __init__(self, fish_rod, fish_left: int, worm_left, money, caught_fish: list, type_worm: str, level: int,
-                 cash: int,
+    def __init__(self, fish_rod, fish_left: int, worm_left, money_in_wallet, caught_fish: list, type_worm: str,
+                 level: int,
+                 cash: int, pie: int,
                  inventar=0,
                  dog_met=False,
                  new_act=0):
-        super().__init__(fish_rod, fish_left, worm_left, money, caught_fish, type_worm, inventar, dog_met, level, cash)
+        super().__init__(fish_rod, fish_left, worm_left, money_in_wallet, caught_fish, type_worm, level, cash, pie,
+                         inventar, dog_met)
         self.max_length = 10
         self.qual_tea = 0
         self.dog_met = dog_met
-        self.money = money
+        self.money = money_in_wallet
 
     def message(self):
         print(f"{Fore.GREEN}Вы добрались до богатой поляны{Style.RESET_ALL}")
@@ -780,17 +789,22 @@ class Mountains(AtHome):
             dog_met=self.dog_met,
             type_worm=self.type_worm,
             level=self.level,
-            cash=self.cash
+            cash=self.cash,
+            pie=self.pie
         )
         home.mes_you_home()
         home.activation()
 
 
 class Fair(Fishing):
+    dialog = 0
+    pozghe = 0
+
     def __init__(self, fish_rod: str, fish_count: int, fish_left: int, worm_left: int, money_in_wallet: int,
-                 colored_fish_list: list, caught_fish: list, type_worm: str, level: int, cash: int):
+                 colored_fish_list: list, caught_fish: list, type_worm: str, level: int, cash: int, pie: int):
         super().__init__(fish_rod, fish_count, fish_left, worm_left, money_in_wallet, colored_fish_list, caught_fish,
-                         type_worm, level, cash)
+                         type_worm, level, cash, pie)
+        self.pie = pie
 
     def message(self):
         print(f"{Fore.GREEN}Ты добрался до ярмарки!{Style.RESET_ALL}")
@@ -828,21 +842,48 @@ class Fair(Fishing):
         print(f"└{border}┘")
 
     def run_tamara(self):
-        self.talk_with_Tamara("🐟 Рыбак", "Сегодня отличный день для ярмарки!")
-        self.talk_with_Tamara("👩‍🦰 Тамара", "Хе-хе! Рыбак, береги кости!")
-        self.talk_with_Tamara("🐟 Рыбак", "Что??")
-        self.talk_with_Tamara("👩‍🦰 Тамара",
-                              f"Грр! Берегись открытого океана, ибо могущественные {Fore.BLUE}whale{Style.RESET_ALL} рядом...")
-        self.talk_with_Tamara("🐟 Рыбак", "Ладно..")
-
-        if self.level > 3 or self.level == 3:
-            self.talk_with_Tamara("👩‍🦰 Тамара", "Хо-х! Рыбак, я вижу ты уже продвинутый малый!")
-            self.talk_with_Tamara("👩‍🦰 Тамара", "Шучу!")
+        global dialog, pozghe
+        fish_ = 0
+        if self.dialog != 1:
+            self.talk_with_Tamara("🐟 Рыбак", "Сегодня отличный день для ярмарки!")
+            self.talk_with_Tamara("👩‍🦰 Тамара", "Хе-хе! Рыбак, береги кости!")
+            self.talk_with_Tamara("🐟 Рыбак", "Что??")
             self.talk_with_Tamara("👩‍🦰 Тамара",
-                                  f"Но если у тебя будет {Fore.LIGHTBLACK_EX}3 шт{Style.RESET_ALL} лишней рыбки,"
-                                  f"\n             то я приготовлю тебе кое-что😋")
+                                  f"Грр! Берегись открытого океана, ибо могущественные {Fore.BLUE}whale{Style.RESET_ALL} рядом...")
             self.talk_with_Tamara("🐟 Рыбак", "Ладно..")
 
+        while self.dialog == 0:
+            if self.level > 3 or self.level == 3:
+                self.dialog = 1
+                self.talk_with_Tamara("👩‍🦰 Тамара", "Хо-х! Рыбак, я вижу ты уже продвинутый малый!")
+                self.talk_with_Tamara("👩‍🦰 Тамара", "Шучу!")
+                self.talk_with_Tamara("👩‍🦰 Тамара",
+                                      f"Но если у тебя будет {Fore.LIGHTBLACK_EX}3 шт{Style.RESET_ALL} лишней рыбки,"
+                                      f"\n             то я приготовлю тебе кое-что😋")
+                self.talk_with_Tamara("🐟 Рыбак", "Ладно..")
+                self.choose_action()
+        if self.dialog == 1 and self.pozghe != 1:
+            give_fish = input(f"Хочешь отдать Тамаре {Fore.LIGHTBLACK_EX}3 шт{Style.RESET_ALL} рыбки? (да/нет) ")
+            if give_fish.lower() == 'да':
+                if self.caught_fish != []:
+                    print(f"У тебя есть: {self.caught_fish}")
+                    while fish_ != 3:
+                        try:
+                            which_fish = input("Какую отдашь? ")
+                            self.caught_fish.remove(which_fish)
+                            fish_ += 1
+                            print(self.caught_fish)
+                        except ValueError or TypeError:
+                            print("Ой! Введи название рыбки!!")
+                            print(which_fish)
+                    if fish_ == 3:
+                        self.pozghe = 1
+                        self.talk_with_Tamara("👩‍🦰 Тамара", "Хо-хо! Рыбак, приходи позже!")
+                        self.choose_action()
+        if self.pozghe == 1:
+            self.talk_with_Tamara("👩‍🦰 Тамара", "Рыбак, а вот и твой рыбный пирог🥧!")
+            self.pie += 1
+            print(f"У тебя есть {Fore.CYAN}{self.pie}{Style.RESET_ALL} пирог(а/ов)")
         self.activity()
 
     def buy_bait(self):
@@ -892,7 +933,7 @@ class Fair(Fishing):
     def return_home(self):
         home = AtHome(self.fish_rod, self.fish_count, self.fish_left, self.worm_left,
                       self.money_in_wallet, self.colored_fish_list, self.caught_fish, self.type_worm, self.level,
-                      self.cash)
+                      self.cash, self.pie)
         # fish_rod, fish_count, fish_left, worm_left, money, colored_fish_list, caught_fish, type_worm
         home.activation()
 
@@ -904,7 +945,7 @@ class OceanJourney:
 def start():
     if __name__ == '__main__':
         fishing = Fishing(fish_rod="Обычная удочка", money=0, fish_count=0, fish_left=0, worm_left=0,
-                          colored_fish_list=[], caught_fish=[], type_worm="None", level=0, cash=0)
+                          colored_fish_list=[], caught_fish=[], type_worm="None", level=3, cash=0, pie=0)
         fishing.list_activity()
         fishing.activation()
 
@@ -916,8 +957,13 @@ def start():
 # moun = Mountains(money=3000, fish_rod="Обычная удочка", fish_left=0, worm_left=0, caught_fish=[])
 # moun.message()
 
-fair = Fair(fish_rod="Обычная удочка", fish_count=0, fish_left=0, money_in_wallet=300, colored_fish_list=[],
-            caught_fish=[],
-            worm_left=0, type_worm='None', level=3, cash=0)
+fair = Fair(fish_rod="Обычная удочка", fish_count=0, fish_left=0, money_in_wallet=300,
+            colored_fish_list=[],
+            caught_fish=["чехонь", "окунь", "язь"],
+            worm_left=0, type_worm='None', level=3, cash=0, pie=0)
 fair.activity()
 fair.choose_action()
+
+'''Доработать механику:
+ "положить пирог и рыбу в холодильник + возможность достать 
+                конкретную рыбку и пирог(к-во)"'''
