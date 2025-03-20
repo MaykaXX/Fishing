@@ -477,16 +477,54 @@ class AtHome(Fishing):
         global fridge
         quest1 = int(input("Положить в холодильник(1) или взять из холодильника(2): "))
         if quest1 == 1:
-            if self.caught_fish == []:
-                print("У тебя нету рыбы!")
-                self.activation()
+            quest2 = int(input("Положить пирог(1) или положить рыбу(2): "))
+            if quest2 == 2:
+                if self.caught_fish == []:
+                    print("У тебя нету рыбы!")
+                    self.activation()
+                else:
+                    print(f"Ты положил рыбу: ")
+                    for fish in self.caught_fish:
+                        print(f"\t{self.color_fish(fish)}")
+                    self.fridge.extend(self.caught_fish)
+                    self.caught_fish.clear()
+                    self.activation()
+            elif quest2 == 1:
+                if self.pie == 0:
+                    print("У тебя нету пирогов! Сделай сначала квест")
+                    self.activation()
+                else:
+                    print(f"Ты положил {self.pie} пирог(-а/-ов)")
+                    self.name_pie = "Пирог"
+                    self.fridge.extend([self.name_pie] * self.pie)
+                    self.pie = 0
+                    self.activation()
             else:
-                print(f"Ты положил рыбу: ")
-                for fish in self.caught_fish:
-                    print(f"\t{self.color_fish(fish)}")
-                self.fridge.extend(self.caught_fish)
-                self.caught_fish.clear()
+                print("Неверный ввод! Введи число!")
                 self.activation()
+        elif quest1 == 2:
+            print("В холодильнике: ")
+            for items in self.fridge:
+                print(f"\t{self.color_fish(items)}")
+
+            def take_items(items, to_take):
+                for item in to_take:
+                    if item in items:
+                        items.remove(item)
+                    else:
+                        print("Проверь свой ввод!")
+                        self.fridge_fun()
+
+            user_input = input("Введи то, что ты хочешь взять (через запятую): ")
+            items_to_take = user_input.split(",")
+            items_to_take = [item.strip() for item in items_to_take]
+            take_items(self.fridge, items_to_take)
+            self.caught_fish = items_to_take
+            if self.fridge != []:
+                print(f"В холодильнике осталось {self.fridge}")
+            else:
+                print("Теперь в холодильнике пусто 🕸")
+            self.activation()
 
     def tv(self):
         print(
@@ -510,7 +548,7 @@ class AtHome(Fishing):
 
     def see_fridge(self):
         if self.fridge != []:
-            print("У тебя есть: ")
+            print("Там лежит: ")
 
             def show_fish():
                 for fish in self.fridge:
@@ -966,4 +1004,4 @@ fair.choose_action()
 
 '''Доработать механику:
  "положить пирог и рыбу в холодильник + возможность достать 
-                конкретную рыбку и пирог(к-во)"'''
+                конкретную рыбку и пирог(к-во)" '''
