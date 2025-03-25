@@ -7,12 +7,12 @@ colorama.init()
 
 
 class Fishing:
-    def __init__(self, fish_rod: str, fish_count: int, fish_left: int, worm_left: int, money: int,
+    def __init__(self, fish_rod: str, fish_count: int, fish_left: int, worm_left: int, money_in_wallet: int,
                  colored_fish_list: list, caught_fish: list, type_worm: str, level: int, cash: int, pie: int):
         self.fish_rod = fish_rod
         self.fish_left: int = fish_left
         self.worm_left = worm_left
-        self.money_in_wallet = money
+        self.money_in_wallet = money_in_wallet
         self.colored_fish_list = colored_fish_list
         self.type_worm = type_worm
         self.level = level
@@ -78,8 +78,11 @@ class Fishing:
 
     def rand_qual_worms(self):
         worms_rand = random.randint(1, 10)
-        self.qualit_worm = worms_rand
-        self.worm_left = worms_rand
+        if self.worm_left:
+            self.qualit_worm = self.worm_left + worms_rand
+        else:
+            self.qualit_worm = worms_rand
+            self.worm_left = worms_rand
         print(f"Сегодня у тебя с собой {Fore.BLUE}{self.qualit_worm}{Style.RESET_ALL} червь(-ей)")
         print(self.fish_rod)
         if self.type_worm == "A-червячок":
@@ -135,14 +138,19 @@ class Fishing:
             if not isinstance(self.fish_left, int):
                 print(f"Ошибка! fish_left стал {type(self.fish_left)}: {self.fish_left}")
                 self.fish_left = 0
-            self.fish_count += 1
 
-            self.fish_left += 1
+            self.fish_count += 1
             self.caught_fish.append(fish)
+            self.fish_left = len(self.caught_fish)
+            print(self.fish_left)
+
             print(self.caught_fish)
+
             self.cash += fish['price']
+
             print(f"У тебя уже: {Fore.BLUE}{str(self.fish_count)}{Style.RESET_ALL} рыба за игру")
             print(f"У тебя осталось {Fore.BLUE}{self.worm_left}{Style.RESET_ALL} червь(-ей)")
+
             self.level_()
             if self.level == 2:
                 print(f"{Fore.GREEN}Загляни к Тамаре, чтобы узнать, что тебе стало доступно!{Style.RESET_ALL}")
@@ -243,9 +251,6 @@ class Fishing:
         ]
         self.lucky = random.randint(0, 1000)
         print(f"{self.lucky} {Fore.LIGHTBLACK_EX}standart{Style.RESET_ALL}")
-        '''Дополнительно сделать
-         возможность использовать приманку из прошлого захода
-          (пришел домой и решил опять на рыбалку)'''
 
         # Преимущества удочки
         if self.fish_rod == "Обычная удочка":
@@ -334,7 +339,7 @@ class Fishing:
     def exit_(self):
         exit_choice = input("Завершить рыбалку? ")
         if exit_choice.lower() == 'да':
-            if self.caught_fish != []:
+            if self.caught_fish:
                 self.colored_fish_list = ', '.join([
                     self.color_fish(fish) for fish in self.caught_fish if
                     isinstance(fish, dict) and isinstance(self.caught_fish, list)
@@ -362,36 +367,40 @@ class Fishing:
             self.exit_()
 
     def random_encounter(self):
-        encounter = random.randint(1, 2)
-        if encounter == 1:
-            print(f"Тебе по пути встертился {Fore.YELLOW}Клим{Style.RESET_ALL}!")
+        if self.fish_left:
+            encounter = random.randint(1, 2)
+            if encounter == 1:
+                print(f"Тебе по пути встертился {Fore.YELLOW}Клим{Style.RESET_ALL}!")
 
-            def want_sell():
-                message = input("Хочешь продать ему рыбу? ")
-                if message.lower() == "да":
-                    self.print_money()
-                elif message.lower() == "нет":
-                    print("Ладно, Клим ушёл. А ты возвращаешься домой с рыбкой. Тебе нужнее!")
-                    self.print_home()
-                    self.call_home()
-                else:
-                    print("Ой что-то не так! Попробуй ещё раз...")
-                    want_sell()
+                def want_sell():
+                    message = input("Хочешь продать ему рыбу? ")
+                    if message.lower() == "да":
+                        self.fish_left = 0
+                        self.print_money()
+                    elif message.lower() == "нет":
+                        print("Ладно, Клим ушёл. А ты возвращаешься домой с рыбкой. Тебе нужнее!")
+                        self.print_home()
+                        self.call_home()
+                    else:
+                        print("Ой что-то не так! Попробуй ещё раз...")
+                        want_sell()
 
-            want_sell()
+                want_sell()
+            else:
+                print("По пути ты никого не встретил :(")
+                self.money_in_wallet = self.cash
+                self.cash = 0
+                self.print_home()
+                self.call_home()
         else:
-            print("По пути ты никого не встретил :(")
-            self.money_in_wallet = self.cash
-            self.cash = 0
-            self.print_home()
-            self.call_home()
+            pass
 
     def sell_fish(self):
         quest_sell = input("Хочешь продать на рынке рыбу? ")
         if quest_sell.lower() == "да":
-            while self.caught_fish != []:
+            while self.caught_fish:
                 self.print_money()
-            if self.caught_fish == []:
+            if not self.caught_fish:
                 print(f"{Fore.LIGHTRED_EX}У тебя нету рыбы на продажу!{Style.RESET_ALL}")
         elif quest_sell.lower() == "нет":
             print("Хорошо, сегодня был отличный день!")
@@ -605,7 +614,7 @@ class AtHome(Fishing):
             fish_count=self.fish_count,
             fish_left=self.fish_left,
             worm_left=self.worm_left,
-            money=self.money_in_wallet,
+            money_in_wallet=self.money_in_wallet,
             colored_fish_list=self.colored_fish_list,
             caught_fish=self.caught_fish,
             type_worm=self.type_worm,
@@ -876,6 +885,7 @@ class Fair(Fishing):
 
     def message(self):
         print(f"{Fore.GREEN}Ты добрался до ярмарки!{Style.RESET_ALL}")
+        print(f"У тебя {Fore.CYAN}{self.money_in_wallet}{Style.RESET_ALL} руб")
         self.activity()
 
     def activity(self):
@@ -961,8 +971,8 @@ class Fair(Fishing):
                                 else:
                                     print("Ой! Такой рыбки у тебя нет, попробуй еще раз!")
 
-                            except Exception as e:
-                                print(f"Ошибка: {e}")
+                            except ValueError:
+                                print("Введи рыбку!")
 
                     if self.fish_ == 3:
                         self.pozghe = 1
@@ -1028,35 +1038,32 @@ class Fair(Fishing):
         home.activation()
 
 
-class OceanJourney:
+class OceanJourney(Fishing):
     pass
 
 
 def start():
     if __name__ == '__main__':
-        fishing = Fishing(fish_rod="Обычная удочка", money=0, fish_count=3, fish_left=0, worm_left=0,
+        fishing = Fishing(fish_rod="Обычная удочка", money_in_wallet=0, fish_count=0, fish_left=0, worm_left=0,
                           colored_fish_list=[],
-                          caught_fish=[{'name': 'бычок', 'price': 40}, {'name': 'бычок', 'price': 40},
-                                       {'name': 'карасик', 'price': 50}], type_worm="None", level=2, cash=0, pie=0)
+                          caught_fish=[], type_worm="None", level=0, cash=0, pie=0)
         fishing.list_activity()
         fishing.activation()
 
 
-# start()
+start()
 
+# TEST FROM ATHOME
 # home = AtHome(inventar=0, caught_fish=[], money=3000, fish_rod="Обычная удочка")
 # home.activation()
 # moun = Mountains(money=3000, fish_rod="Обычная удочка", fish_left=0, worm_left=0, caught_fish=[])
 # moun.message()
 
-fair = Fair(fish_rod="Обычная удочка", fish_count=0, fish_left=0, money_in_wallet=300,
-            colored_fish_list=[],
-            caught_fish=[{'name': 'бычок', 'price': 40}, {'name': 'бычок', 'price': 40},
-                         {'name': 'карасик', 'price': 50}],
-            worm_left=0, type_worm='None', level=3, cash=0, pie=0)
-fair.activity()
-fair.choose_action()
-
-'''Доработать механику:
- "положить пирог и рыбу в холодильник + возможность достать 
-                конкретную рыбку и пирог(к-во)" '''
+# TEST FROM FAIR
+# fair = Fair(fish_rod="Обычная удочка", fish_count=0, fish_left=0, money_in_wallet=300,
+#             colored_fish_list=[],
+#             caught_fish=[{'name': 'бычок', 'price': 40}, {'name': 'бычок', 'price': 40},
+#                          {'name': 'карасик', 'price': 50}],
+#             worm_left=0, type_worm='None', level=3, cash=0, pie=0)
+# fair.activity()
+# fair.choose_action()
