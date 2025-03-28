@@ -1,4 +1,6 @@
 import random
+import threading
+import time
 
 import colorama
 from colorama import Fore, Style
@@ -35,7 +37,8 @@ class Fishing:
                          3: ("Любоваться природой", self.admire),
                          4: ("Ловить рыбу", self.rand_qual_worms),
                          5: ("Ничего", self.nothing),
-                         6: ("Уйти домой", self.exit_)
+                         6: ("Уйти домой", self.exit_),
+                         7: ("В океан!", self.ocean)
                          }
 
     def activation(self):
@@ -47,7 +50,7 @@ class Fishing:
 
     def activ_funk(self):
         try:
-            self.choice1 = int(input("Что хочешь сделать(1-6)? "))
+            self.choice1 = int(input("Что хочешь сделать(1-7)? "))
 
             if self.choice1 in self.activism:
                 activism = self.activism[self.choice1][1]
@@ -56,10 +59,11 @@ class Fishing:
                 print("Неверный выбор! Попробуй еще :)")
                 self.activ_funk()
         except ValueError:
-            print("Ой, введите номер действия (1-6)")
+            print("Ой, введите номер действия (1-7)")
             self.activ_funk()
 
     def dine(self):
+        time.sleep(1)  # подождать 1 сек
         print(f"{Fore.YELLOW}Ты подкрепился!{Style.RESET_ALL}")
         self.activ_funk()
 
@@ -218,7 +222,7 @@ class Fishing:
             self.cooking(fish)
 
     def random_fish(self):
-        fish_list = [
+        self.fish_list = [
             {"name": "плотва", "price": 20},
             {"name": "ерховка", "price": 30},
             {"name": "бычок", "price": 40},
@@ -249,6 +253,27 @@ class Fishing:
             {"name": "меч-рыба", "price": 2500},
             {"name": "белуга", "price": 5000}
         ]
+
+        if isinstance(self, OceanJourney):
+            self.fish_list = [
+                {"name": "тунец", "price": 220},
+                {"name": "марлин", "price": 250},
+                {"name": "рыба-меч", "price": 270},
+                {"name": "барракуда", "price": 290},
+                {"name": "макрель", "price": 310},
+                {"name": "хамса", "price": 330},
+                {"name": "ставрида", "price": 350},
+                {"name": "рыба-попугай", "price": 370},
+                {"name": "групер", "price": 400},
+                {"name": "лунник", "price": 420},
+                {"name": "желтоперый тунец", "price": 450},
+                {"name": "рыба-ангел", "price": 470},
+                {"name": "морской окунь", "price": 500},
+                {"name": "палтус", "price": 530},
+                {"name": "рыба-наполеон", "price": 560},
+                {"name": "рыба-фугу", "price": 600}
+            ]
+
         self.lucky = random.randint(0, 1000)
         print(f"{self.lucky} {Fore.LIGHTBLACK_EX}standart{Style.RESET_ALL}")
 
@@ -289,18 +314,18 @@ class Fishing:
 
         # Какая рыбка может выловиться в зависимости от удачи и удочки
         if self.lucky < 400:
-            fish_list = fish_list[:12]
+            fish_list = self.fish_list[:12]
         elif self.lucky < 600:
-            fish_list = fish_list[13:18]
+            fish_list = self.fish_list[13:18]
         elif self.lucky < 700:
-            fish_list = fish_list[19:21]
+            fish_list = self.fish_list[19:21]
         elif self.lucky < 900:
-            fish_list = fish_list[22:23]
+            fish_list = self.fish_list[22:23]
         elif self.lucky < 999:
-            fish_list = fish_list[24:26]
+            fish_list = self.fish_list[24:26]
         else:
             print(self.lucky)
-            fish_list = fish_list[27:28]
+            fish_list = self.fish_list[27:28]
 
         if self.lucky < 0 or self.lucky == 0:
             print("Твоя удочка слишком слаба для такой рыбки!😢")
@@ -318,6 +343,7 @@ class Fishing:
     def process_cook(self, fish):
         for i in 'Cooking':
             print(f"{Fore.BLUE}{i}{Style.RESET_ALL}")
+            time.sleep(3)  # подождать 3 сек и дальше продолжать (готовится рыбка :) )
         print(f"{Fore.MAGENTA}Ты приготовил{Style.RESET_ALL} {self.color_fish(fish)}")
         self.money_in_wallet -= fish['price']
         if fish in self.caught_fish:
@@ -330,6 +356,7 @@ class Fishing:
     def eat(self):
         write_eat = input("напиши <кушать> ")
         if write_eat.lower() == "кушать":
+            time.sleep(3)  # подождать 3 сек (кушаешь)
             print("Теперь ты сыт!")
             self.exit_()
         else:
@@ -422,6 +449,7 @@ class Fishing:
     def print_home(self):
         for i in 'Home':
             print(f"{Fore.BLUE}{i}{Style.RESET_ALL}  ")
+        time.sleep(2)  # подождать 2 сек и дальше давать меню действий
 
     def call_home(self):
         home = AtHome(
@@ -440,6 +468,23 @@ class Fishing:
         home.mes_you_home()
         home.activation()
 
+    def ocean(self):
+        ocean = OceanJourney(
+            fish_rod=self.fish_rod,
+            fish_count=self.fish_count,
+            fish_left=self.fish_left,
+            worm_left=self.worm_left,
+            money_in_wallet=self.money_in_wallet,
+            colored_fish_list=self.colored_fish_list,
+            caught_fish=self.caught_fish,
+            type_worm=self.type_worm,
+            level=self.level,
+            cash=self.cash,
+            pie=self.pie
+        )
+        ocean.message()
+        ocean.list_activity_ocean()
+
 
 class AtHome(Fishing):
     fridge = []
@@ -457,6 +502,7 @@ class AtHome(Fishing):
         self.action()
 
     def mes_you_home(self):
+        time.sleep(3)  # подождать 3 сек и дальше давать меню действий
         print("Ты вернулся домой!")
         self.new_friend()
 
@@ -570,6 +616,7 @@ class AtHome(Fishing):
         self.random_visit()
 
     def washing_clothes(self):
+        time.sleep(1)  # подождать 1 сек
         print(f"{Fore.YELLOW}Ты стираешь одежду. Числота - залог здоровья!🫧{Style.RESET_ALL}")
         self.activation()
 
@@ -750,6 +797,7 @@ class Mountains(AtHome):
         self.money = money_in_wallet
 
     def message(self):
+        time.sleep(2)  # подождать 2 сек и дальше давать меню действий
         print(f"{Fore.GREEN}Вы добрались до богатой поляны{Style.RESET_ALL}")
         print(self.dog_met)
         self.for_dog()
@@ -884,6 +932,7 @@ class Fair(Fishing):
         self.pie = pie
 
     def message(self):
+        time.sleep(2)  # подождать 2 сек и дальше давать меню действий
         print(f"{Fore.GREEN}Ты добрался до ярмарки!{Style.RESET_ALL}")
         print(f"У тебя {Fore.CYAN}{self.money_in_wallet}{Style.RESET_ALL} руб")
         self.activity()
@@ -1039,7 +1088,139 @@ class Fair(Fishing):
 
 
 class OceanJourney(Fishing):
-    pass
+    weather_tomorrow = False
+
+    def __init__(self, fish_rod: str, fish_count: int, fish_left: int, worm_left: int, money_in_wallet: int,
+                 colored_fish_list: list, caught_fish: list, type_worm: str, level: int, cash: int, pie: int):
+        super().__init__(fish_rod, fish_count, fish_left, worm_left, money_in_wallet,
+                         colored_fish_list, caught_fish, type_worm, level, cash, pie)
+
+    def message(self):
+        time.sleep(3)  # подождать 3 сек и дальше давать меню действий
+        print(
+            f"{Fore.LIGHTMAGENTA_EX}Твоя лодка медленно катится по воде.\nТебя ждет большое плаванье!💦🚢{Style.RESET_ALL}")
+
+    def list_activity_ocean(self):
+        self.activism = {
+            1: ("Закинуть удочку в воду", self.rand_qual_worms),
+            2: ("Присмотреться вдаль", self.look_distance_ocean),  # удача увидеть редкого торговца
+            3: ("Послушать радио", self.listen_to_radio),
+            4: ("Вернуться домой", self.call_home)
+        }
+        for key, (desc, _) in self.activism.items():
+            print(f"{Fore.LIGHTGREEN_EX}{key}{Style.RESET_ALL}. {desc}")
+        self.activ_funk()
+
+    def talk_with_Dealer(self, character, text):
+        border = "─" * (len(text) + 12)
+        print(f"┌{border}┐")
+        print(f"| {character}: {text} |")
+        print(f"└{border}┘")
+
+    def look_distance_ocean(self):
+        self.lucky_ocean = random.randint(0, 100)
+        if self.lucky_ocean <= 90:
+            print(
+                f"{Fore.LIGHTCYAN_EX}Ты долго смотрел вдаль, но все,\nчто ты увидел, это лишь чайки и куски бревен🐦‍⬛👀{Style.RESET_ALL}")
+            self.list_activity_ocean()
+        else:
+
+            print(
+                f"Лучи солнца, отбивающиеся от воды, пронзали твои глаза.\n{Fore.BLUE}Но все же ты увидел зеленый кораблик, который плыл тебе навстречу!{Style.RESET_ALL}")
+            self.talk_with_Dealer("👨‍🎤 Торговец",
+                                  "Привет, путник! Сколько я не видел здесь, среди большого океана, живых людей...\nКХМ!")
+            self.talk_with_Dealer("🐟 Рыбак",
+                                  "Живых людей???😥")
+            self.talk_with_Dealer("👨‍🎤 Торговец",
+                                  "Ну знаешь... Вообще-то, я не должен тебя пугать, кто знает, сколько тебе еще плавать, но...")
+            self.talk_with_Dealer("👨‍🎤 Торговец",
+                                  f"Ладно! Говорят в океане живет большой, но очень старый {Fore.BLUE}whale{Style.RESET_ALL}.\nИ судя по количеству обломков огромных кораблей он очень зол...")
+            self.talk_with_Dealer("🐟 Рыбак",
+                                  f"Я читал в книгах о {Fore.BLUE}whale{Style.RESET_ALL}, они действительно могущественны!\nГоворят из его черепа делали целые арки..")
+            self.talk_with_Dealer("👨‍🎤 Торговец",
+                                  f"Словом, берегись!")
+        want_buy = input("Хочешь купить что-нибудь?(да/нет) ")
+        if want_buy.lower() == "да":
+            self.talk_with_Dealer("👨‍🎤 Торговец", "Загляни, у меня много чего полезного!")
+            self.dealer()
+
+        elif want_buy.lower() == "нет":
+            pass
+        else:
+            print(f"{Fore.RED}Введи да или нет!{Style.RESET_ALL}")
+            print(want_buy)
+        self.list_activity_ocean()
+
+    def dealer(self):  # дописать после прочтения книги "Моби Дик" орудие убийства кита
+        list_dealer = {
+            1: (f"{Fore.CYAN}???{Style.RESET_ALL}", 4000),
+            2: (f"Ноты песни для приманки {Fore.BLUE}whale{Style.RESET_ALL}", 1500),
+            3: (f"Дар для {Fore.BLUE}whale{Style.RESET_ALL}", 2000)
+        }
+        for key, name, price in list_dealer.items():
+            print(f"{key}. {name} - {price} руб")
+
+        def which_rare_item():
+            try:
+                buy = int(input("Что купишь? (введи номер): "))
+                if buy == 1:
+                    print("Оружие еще не доступно :)")
+                    self.list_activity_ocean()
+                elif buy in list_dealer:
+                    name, price = list_dealer[buy]
+                    if int(self.money_in_wallet) < price:
+                        print(f"Тебе не хватает {price - self.money_in_wallet} рублей!")
+                        self.list_activity_ocean()
+                    else:
+                        self.money_in_wallet -= price
+                        self.type_worm = name
+                        print(f"Ты купил {name}{Style.RESET_ALL}! У тебя осталось {self.money_in_wallet} руб.")
+                        self.list_activity_ocean()
+                else:
+                    print("Неверный ввод!")
+                    which_rare_item()
+            except ValueError:
+                print("Нужно ввести число")
+                which_rare_item()
+
+        which_rare_item()
+        self.list_activity_ocean()
+
+    def listen_to_radio(self):
+        global weather_tomorrow
+        print(
+            f"{Fore.LIGHTCYAN_EX}По радио крутили матчи бейсбола. \nТы слушал, и тебе представлялись давно забытые эпизоды из молодости!{Style.RESET_ALL}")
+        weather = input("Хочешь послушать прогноз погоды?(да/нет) ")
+        if weather.lower() == "да":
+            while not self.weather_tomorrow:
+                list_weather = ["Солнечная погода🌻", "Весь день дождь💦", "Жаркая и сухая погода🥵",
+                                "Весь день туман😶‍🌫️",
+                                "Мороз🥶",
+                                "Прохладно весь день🍃"]
+                random_weather = random.choice(list_weather)
+                self.same_weather = random_weather
+                print(f"Завтра будет {random_weather}")
+                self.weather_tomorrow = True
+                self.start_weather_timer()
+
+                self.list_activity_ocean()
+            if self.weather_tomorrow:
+                print(f"Завтра будет {self.same_weather}")
+                self.list_activity_ocean()
+        elif weather.lower() == "нет":
+            print("Хорошо!")
+            self.list_activity_ocean()
+        else:
+            print(f"{Fore.RED}Введи да или нет!{Style.RESET_ALL}")
+
+    def start_weather_timer(self):
+        def timer():
+            time.sleep(120)
+            self.weather_tomorrow = False  # Новый день — обновляем прогноз погоды
+            print("\n--- Новый день! ---")
+
+        thread = threading.Thread(target=timer, daemon=True)
+        thread.start()  # Запускаем таймер в фоне
 
 
 def start():
