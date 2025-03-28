@@ -1,11 +1,11 @@
 # Это консольная игра Рыбалка. Я просто тренирую ооп и другие штуки:). Но игра наполнена историей (и продолжает наполнятся). В основном я беру идеи из других полноценных игор и книг. 
 
-**Все, что надо чтобы начать играть это нажать на синее названик ** 
+**Все, что надо чтобы начать играть это нажать на синее названик** 
 [Fishing](https://github.com/MaykaXX/Fishing)
 
-**и скопировать ссылку на рыбалку загляни в assets [picture 1](assets/picture 1.png)**
-и [picture 2](assets/picture 2.png).
+**и скопировать ссылку на рыбалку загляни в assets [picture 1](assets/picture1.png)**
+и [picture 2](assets/picture2.png).
 
-Далее открой этот файл в любой редакторе кода (лучше всего в pycharm) смотри  (picture 3) [assets/picture 3.png] и (picture 4) [assets/picture 4.png] 
+Далее открой этот файл в любой редакторе кода (лучше всего в pycharm) смотри  [picture 3](assets/picture3.png) и [picture 4](assets/picture4.png) 
 
 Пробуй! :shipit:
