@@ -1,7 +1,7 @@
 import random
 import threading
 import time
-
+import pyglet
 import colorama
 from colorama import Fore, Style
 
@@ -984,7 +984,7 @@ class Fair(Fishing):
         if self.dialog == 0 and self.first_meet:
             if self.level > 2 or self.level == 2:
                 self.dialog = 1
-                self.talk_with_Tamara("👩‍🦰 Тамара", "Хо-х! Рыбак, я вижу ты уже продвинутый малый!")
+                self.talk_with_Tamara("👩‍🦰 Тамара", "Хо-хо! Рыбак, я вижу ты уже продвинутый малый!")
                 self.talk_with_Tamara("👩‍🦰 Тамара", "Шучу!")
                 self.talk_with_Tamara("👩‍🦰 Тамара",
                                       f"Но если у тебя будет {Fore.LIGHTBLACK_EX}3 шт{Style.RESET_ALL} лишней рыбки,"
@@ -1096,7 +1096,6 @@ class OceanJourney(Fishing):
                          colored_fish_list, caught_fish, type_worm, level, cash, pie)
 
     def message(self):
-        time.sleep(3)  # подождать 3 сек и дальше давать меню действий
         print(
             f"{Fore.LIGHTMAGENTA_EX}Твоя лодка медленно катится по воде.\nТебя ждет большое плаванье!💦🚢{Style.RESET_ALL}")
 
@@ -1140,11 +1139,11 @@ class OceanJourney(Fishing):
             self.talk_with_Dealer("👨‍🎤 Торговец",
                                   f"Словом, берегись!")
         want_buy = input("Хочешь купить что-нибудь?(да/нет) ")
-        if want_buy.lower() == "да":
+        if want_buy.lower() == 'да':
             self.talk_with_Dealer("👨‍🎤 Торговец", "Загляни, у меня много чего полезного!")
             self.dealer()
 
-        elif want_buy.lower() == "нет":
+        elif want_buy.lower() == 'нет':
             pass
         else:
             print(f"{Fore.RED}Введи да или нет!{Style.RESET_ALL}")
@@ -1152,39 +1151,38 @@ class OceanJourney(Fishing):
         self.list_activity_ocean()
 
     def dealer(self):  # дописать после прочтения книги "Моби Дик" орудие убийства кита
-        list_dealer = {
+        self.list_dealer = {
             1: (f"{Fore.CYAN}???{Style.RESET_ALL}", 4000),
             2: (f"Ноты песни для приманки {Fore.BLUE}whale{Style.RESET_ALL}", 1500),
             3: (f"Дар для {Fore.BLUE}whale{Style.RESET_ALL}", 2000)
         }
-        for key, name, price in list_dealer.items():
+        for key, (name, price) in self.list_dealer.items():
             print(f"{key}. {name} - {price} руб")
-
-        def which_rare_item():
-            try:
-                buy = int(input("Что купишь? (введи номер): "))
-                if buy == 1:
-                    print("Оружие еще не доступно :)")
-                    self.list_activity_ocean()
-                elif buy in list_dealer:
-                    name, price = list_dealer[buy]
-                    if int(self.money_in_wallet) < price:
-                        print(f"Тебе не хватает {price - self.money_in_wallet} рублей!")
-                        self.list_activity_ocean()
-                    else:
-                        self.money_in_wallet -= price
-                        self.type_worm = name
-                        print(f"Ты купил {name}{Style.RESET_ALL}! У тебя осталось {self.money_in_wallet} руб.")
-                        self.list_activity_ocean()
-                else:
-                    print("Неверный ввод!")
-                    which_rare_item()
-            except ValueError:
-                print("Нужно ввести число")
-                which_rare_item()
-
-        which_rare_item()
+        self.which_rare_item()
         self.list_activity_ocean()
+
+    def which_rare_item(self):
+        try:
+            buy = int(input("Что купишь? (введи номер): "))
+            if buy == 1:
+                print("Оружие еще не доступно :)")
+                self.list_activity_ocean()
+            elif buy in self.list_dealer:
+                name, price = self.list_dealer[buy]
+                if int(self.money_in_wallet) < price:
+                    print(f"Тебе не хватает {price - self.money_in_wallet} рублей!")
+                    self.list_activity_ocean()
+                else:
+                    self.money_in_wallet -= price
+                    self.type_worm = name
+                    print(f"Ты купил {name}{Style.RESET_ALL}! У тебя осталось {self.money_in_wallet} руб.")
+                    self.list_activity_ocean()
+            else:
+                print("Неверный ввод!")
+                self.which_rare_item()
+        except ValueError:
+            print("Нужно ввести число")
+            self.which_rare_item()
 
     def listen_to_radio(self):
         global weather_tomorrow
