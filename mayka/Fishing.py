@@ -7,6 +7,13 @@ from colorama import Fore, Style
 
 colorama.init()
 
+music = pyglet.resource.media("relax_music.mp3")
+# Создаём плеер
+player = pyglet.media.Player()
+player.queue(music)  # Добавляем музыку в очередь
+player.loop = True  # Включаем зацикливание
+player.play()  # Запускаем воспроизведение
+
 
 class Fishing:
     def __init__(self, fish_rod: str, fish_count: int, fish_left: int, worm_left: int, money_in_wallet: int,
@@ -42,6 +49,8 @@ class Fishing:
                          }
 
     def activation(self):
+        print(f"{Fore.YELLOW}Привет друг! Ты на рыбалке :>{Style.RESET_ALL}")
+
         self.list_activity()
         for key, (desc, _) in self.activism.items():
             print(f"{Fore.LIGHTCYAN_EX}{key}{Style.RESET_ALL}. {desc}")
@@ -1128,17 +1137,29 @@ class OceanJourney(Fishing):
                 f"Лучи солнца, отбивающиеся от воды, пронзали твои глаза.\n{Fore.BLUE}Но все же ты увидел зеленый кораблик, который плыл тебе навстречу!{Style.RESET_ALL}")
             self.talk_with_Dealer("👨‍🎤 Торговец",
                                   "Привет, путник! Сколько я не видел здесь, среди большого океана, живых людей...\nКХМ!")
+            time.sleep(0.5)
             self.talk_with_Dealer("🐟 Рыбак",
                                   "Живых людей???😥")
+            time.sleep(0.5)
             self.talk_with_Dealer("👨‍🎤 Торговец",
                                   "Ну знаешь... Вообще-то, я не должен тебя пугать, кто знает, сколько тебе еще плавать, но...")
+            time.sleep(0.5)
             self.talk_with_Dealer("👨‍🎤 Торговец",
-                                  f"Ладно! Говорят в океане живет большой, но очень старый {Fore.BLUE}whale{Style.RESET_ALL}.\nИ судя по количеству обломков огромных кораблей он очень зол...")
-            self.talk_with_Dealer("🐟 Рыбак",
-                                  f"Я читал в книгах о {Fore.BLUE}whale{Style.RESET_ALL}, они действительно могущественны!\nГоворят из его черепа делали целые арки..")
+                                  f"Ладно! Говорят в океане живет большой, но очень старый {Fore.BLUE}whale{Style.RESET_ALL}.\nИ судя по количеству обломков огромных кораблей он очень зол...\nГоворят из его черепа делали целые арки..")
+            time.sleep(0.5)
+            if player.source:
+                player.pause()
+                music_whale = pyglet.resource.media("howl_whale.mp3")
+                music_whale.play()
+            time.sleep(8)
+            self.talk_with_Dealer("🐟 Рыбак", "Что это было??😧")
+            time.sleep(0.5)
             self.talk_with_Dealer("👨‍🎤 Торговец",
-                                  f"Словом, берегись!")
-        want_buy = input("Хочешь купить что-нибудь?(да/нет) ")
+                                  f"Он уже рядом!")
+            time.sleep(0.5)
+            music.play()
+            time.sleep(1)
+        want_buy = input("Хочешь купить что-нибудь у Торговца?(да/нет) ")
         if want_buy.lower() == 'да':
             self.talk_with_Dealer("👨‍🎤 Торговец", "Загляни, у меня много чего полезного!")
             self.dealer()
@@ -1220,6 +1241,14 @@ class OceanJourney(Fishing):
         thread = threading.Thread(target=timer, daemon=True)
         thread.start()  # Запускаем таймер в фоне
 
+    def music_flate(self):
+        player.pause()
+        music_flate = pyglet.resource.media("music_flate.mp3")
+        music_flate.play()
+
+    def play_func(self):
+        pyglet.app.run()
+
 
 def start():
     if __name__ == '__main__':
@@ -1231,7 +1260,7 @@ def start():
 
 
 start()
-
+pyglet.app.run()
 # TEST FROM ATHOME
 # home = AtHome(inventar=0, caught_fish=[], money=3000, fish_rod="Обычная удочка")
 # home.activation()
